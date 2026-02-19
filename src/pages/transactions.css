@@ -1,0 +1,158 @@
+/* src/pages/Transactions.css */
+.transactions-page {
+  padding: 20px;
+}
+
+.transactions-page h1 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.transaction-form-container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.type-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 15px;
+  background: #f5f5f5;
+  border: 2px solid #e5e7eb;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.type-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.transaction-form input,
+.transaction-form select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.submit-transaction-btn {
+  width: 100%;
+  padding: 12px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.transactions-list {
+  display: grid;
+  gap: 15px;
+}
+
+.transaction-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #667eea;
+}
+
+.transaction-card.stock_out {
+  border-left-color: #ef4444;
+}
+
+.transaction-card.waste {
+  border-left-color: #f59e0b;
+}
+
+.trans-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.trans-type {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trans-type.stock_in {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.trans-type.stock_out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.trans-type.waste {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.trans-date {
+  color: #999;
+  font-size: 12px;
+}
+
+.trans-body p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.flagged-badge {
+  display: inline-block;
+  background: #fee;
+  color: #c33;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}

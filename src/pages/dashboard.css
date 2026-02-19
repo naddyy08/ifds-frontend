@@ -1,0 +1,120 @@
+/* src/pages/Dashboard.css */
+.dashboard {
+  padding: 20px;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.dashboard-header p {
+  color: #666;
+  margin: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.stat-icon.inventory {
+  background: #667eea;
+}
+
+.stat-icon.warning {
+  background: #f59e0b;
+}
+
+.stat-icon.transactions {
+  background: #10b981;
+}
+
+.stat-icon.fraud {
+  background: #ef4444;
+}
+
+.stat-content h3 {
+  margin: 0 0 5px 0;
+  font-size: 32px;
+  color: #333;
+}
+
+.stat-content p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.alert-badge {
+  display: inline-block;
+  background: #fee;
+  color: #c33;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.dashboard-info {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-info h2 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.dashboard-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-info li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  color: #666;
+}
+
+.dashboard-info li:last-child {
+  border-bottom: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 18px;
+  color: #666;
+}

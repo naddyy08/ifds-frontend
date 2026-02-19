@@ -1,0 +1,207 @@
+/* src/pages/FraudAlerts.css */
+.fraud-alerts-page {
+  padding: 20px;
+}
+
+.fraud-alerts-page h1 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-box.pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.stat-box.high {
+  border-left: 4px solid #ef4444;
+}
+
+.stat-box.resolved {
+  border-left: 4px solid #10b981;
+}
+
+.stat-box h3 {
+  margin: 0 0 5px 0;
+  font-size: 32px;
+  color: #333;
+}
+
+.stat-box p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.alerts-list {
+  display: grid;
+  gap: 15px;
+}
+
+.no-alerts {
+  background: white;
+  padding: 60px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-alerts p {
+  margin: 15px 0 0 0;
+  color: #666;
+  font-size: 18px;
+}
+
+.alert-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #667eea;
+}
+
+.alert-card.severity-high {
+  border-left-color: #ef4444;
+}
+
+.alert-card.severity-medium {
+  border-left-color: #f59e0b;
+}
+
+.alert-card.severity-low {
+  border-left-color: #3b82f6;
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.severity-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.severity-badge.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.severity-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.severity-badge.low {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.alert-description {
+  color: #666;
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+}
+
+.alert-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.resolved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.dismissed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.review-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.3s;
+}
+
+.review-btn.resolved {
+  background: #10b981;
+  color: white;
+}
+
+.review-btn.resolved:hover {
+  background: #059669;
+}
+
+.review-btn.dismissed {
+  background: #6b7280;
+  color: white;
+}
+
+.review-btn.dismissed:hover {
+  background: #4b5563;
+}
+
+.alert-notes {
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #666;
+}
