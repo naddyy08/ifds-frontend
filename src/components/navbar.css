@@ -1,44 +1,121 @@
-/* src/components/Navbar.css */
+/* src/components/navbar.css */
 .navbar {
-  background: #667eea;
-  color: white;
-  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0 24px;
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .navbar-brand h2 {
+  color: white;
   margin: 0;
   font-size: 24px;
+  font-weight: 700;
+}
+
+.navbar-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .navbar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
 }
 
-.user-role {
-  color: rgba(255, 255, 255, 0.8);
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-weight: 600;
   font-size: 14px;
 }
 
+.user-email {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+}
+
+.role-badge {
+  /* Inline styles applied in component */
+}
+
 .logout-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-left: 10px;
-  transition: background 0.3s;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
 }
 
 .logout-btn:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+    height: auto;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .navbar-subtitle {
+    display: none;
+  }
+
+  .user-info {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .user-email {
+    display: none;
+  }
 }

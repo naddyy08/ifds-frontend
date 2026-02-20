@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInventory, addInventory, deleteInventory } from '../services/api';
 import { Plus, Trash2, AlertCircle } from 'lucide-react';
+import RoleBasedAccess from '../components/RoleBasedAccess';
 import './inventory.css';
 
 function Inventory() {
@@ -152,9 +153,14 @@ function Inventory() {
           <div key={item.id} className="inventory-card">
             <div className="card-header">
               <h3>{item.item_name}</h3>
-              <button className="delete-icon" onClick={() => handleDelete(item.id)}>
-                <Trash2 size={18} />
-              </button>
+              <RoleBasedAccess allowedRoles={['admin']}>
+                <button 
+                  onClick={() => handleDelete(item.id)}
+                  className="delete-button"
+                >
+                  🗑️ Delete
+                </button>
+              </RoleBasedAccess>
             </div>
             <div className="card-body">
               <p><strong>Category:</strong> {item.category}</p>
