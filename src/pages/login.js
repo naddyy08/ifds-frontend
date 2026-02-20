@@ -90,17 +90,22 @@ function Login() {
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
-          <a 
-            href="#" 
+          <button 
+            type="button"
             onClick={handleForgotPassword}
             style={{ 
+              background: 'none',
+              border: 'none',
               color: '#667eea', 
               textDecoration: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: '14px',
+              padding: 0,
+              font: 'inherit'
             }}
           >
             Forgot password?
-          </a>
+          </button>
         </p>
 
         <p style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
