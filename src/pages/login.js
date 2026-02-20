@@ -37,6 +37,18 @@ function Login() {
     }
   };
 
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    alert(
+      '🔐 Password Reset\n\n' +
+      'Please contact your system administrator to reset your password.\n\n' +
+      'Admin Contact:\n' +
+      '📧 Email: admin@ifds.com\n' +
+      '📞 Phone: +60 12-345-6789\n\n' +
+      'Your administrator will verify your identity and reset your password securely.'
+    );
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -77,7 +89,21 @@ function Login() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
+        <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
+          <a 
+            href="#" 
+            onClick={handleForgotPassword}
+            style={{ 
+              color: '#667eea', 
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Forgot password?
+          </a>
+        </p>
+
+        <p style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
           Don't have an account?{' '}
           <Link to="/register" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600' }}>
             Register here
