@@ -1,7 +1,7 @@
 // src/pages/Inventory.js
 import React, { useState, useEffect } from 'react';
 import { getAllInventory, addInventory, deleteInventory } from '../services/api';
-import { Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, AlertCircle } from 'lucide-react';
 import RoleBasedAccess from '../components/RoleBasedAccess';
 import './inventory.css';
 

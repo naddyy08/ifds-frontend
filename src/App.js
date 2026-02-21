@@ -10,16 +10,40 @@ import FraudAlerts from './pages/fraudalerts';
 import Reports from './pages/reports';
 import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
-import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
+
+// Protected Route Component with Role Checking
+function ProtectedRoute({ children, allowedRoles }) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+
+  // Not logged in - redirect to login
+  if (!token || !userStr) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check role if specified
+  if (allowedRoles) {
+    const user = JSON.parse(userStr);
+    if (!allowedRoles.includes(user.role)) {
+      // User doesn't have permission - redirect to dashboard with alert
+      alert('Access Denied: You do not have permission to access this page.');
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
+  return children;
+}
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         
+        {/* Protected Routes with Layout */}
         <Route
           path="/*"
           element={
@@ -30,11 +54,23 @@ function App() {
                   <Sidebar />
                   <div className="content">
                     <Routes>
+                      {/* Routes accessible by everyone */}
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/inventory" element={<Inventory />} />
                       <Route path="/transactions" element={<Transactions />} />
                       <Route path="/fraud-alerts" element={<FraudAlerts />} />
-                      <Route path="/reports" element={<Reports />} />
+                      
+                      {/* Reports - ONLY admin and manager */}
+                      <Route 
+                        path="/reports" 
+                        element={
+                          <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                            <Reports />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      
+                      {/* Default redirect */}
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </div>
