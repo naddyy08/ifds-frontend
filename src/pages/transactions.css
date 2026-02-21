@@ -1,158 +1,116 @@
-/* src/pages/Transactions.css */
-.transactions-page {
-  padding: 20px;
+/* Enhanced transaction type buttons */
+.type-btn.in {
+  border-color: #10b981;
 }
 
-.transactions-page h1 {
-  margin: 0 0 20px 0;
-  color: #333;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.tab {
-  padding: 12px 24px;
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #666;
-  transition: all 0.3s;
-}
-
-.tab.active {
-  background: #667eea;
+.type-btn.in.active {
+  background-color: #10b981;
   color: white;
-  border-color: #667eea;
 }
 
-.transaction-form-container {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.type-btn.out {
+  border-color: #ef4444;
 }
 
-.type-selector {
+.type-btn.out.active {
+  background-color: #ef4444;
+  color: white;
+}
+
+.type-btn.waste {
+  border-color: #f59e0b;
+}
+
+.type-btn.waste.active {
+  background-color: #f59e0b;
+  color: white;
+}
+
+/* Fraud indicators */
+.fraud-indicators {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.type-btn {
-  flex: 1;
-  padding: 15px;
-  background: #f5f5f5;
-  border: 2px solid #e5e7eb;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  font-weight: 600;
-  transition: all 0.3s;
-}
-
-.type-btn.active {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.transaction-form input,
-.transaction-form select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.submit-transaction-btn {
-  width: 100%;
-  padding: 12px;
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.transactions-list {
-  display: grid;
-  gap: 15px;
-}
-
-.transaction-card {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #667eea;
-}
-
-.transaction-card.stock_out {
-  border-left-color: #ef4444;
-}
-
-.transaction-card.waste {
-  border-left-color: #f59e0b;
-}
-
-.trans-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.trans-type {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.trans-type.stock_in {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.trans-type.stock_out {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.trans-type.waste {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.trans-date {
-  color: #999;
-  font-size: 12px;
-}
-
-.trans-body p {
-  margin: 5px 0;
-  color: #666;
+  align-items: center;
 }
 
 .flagged-badge {
-  display: inline-block;
-  background: #fee;
-  color: #c33;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
-  margin-top: 5px;
+  letter-spacing: 0.5px;
+}
+
+/* Transaction card enhancements */
+.trans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.trans-header-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.item-name {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.quantity-info .value {
+  font-weight: 600;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+.quantity-info .value.stock_in {
+  color: #10b981;
+}
+
+.quantity-info .value.stock_out {
+  color: #ef4444;
+}
+
+.quantity-info .value.waste {
+  color: #f59e0b;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.trans-reason,
+.trans-ref,
+.trans-user {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+.loading,
+.no-transactions {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+/* AI protection notice animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.submit-transaction-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
