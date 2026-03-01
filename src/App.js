@@ -8,6 +8,7 @@ import Inventory from './pages/inventory';
 import Transactions from './pages/transactions';
 import FraudAlerts from './pages/fraudalerts';
 import Reports from './pages/reports';
+import AuditLogs from './pages/AuditLogs';
 import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
 import './App.css';
@@ -66,6 +67,16 @@ function App() {
                         element={
                           <ProtectedRoute allowedRoles={['admin', 'manager']}>
                             <Reports />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      
+                      {/* Audit Logs - ONLY admin */}
+                      <Route 
+                        path="/audit-logs" 
+                        element={
+                          <ProtectedRoute allowedRoles={['admin']}>
+                            <AuditLogs />
                           </ProtectedRoute>
                         } 
                       />
