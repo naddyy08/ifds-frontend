@@ -1,6 +1,6 @@
 // src/pages/AuditLogs.js
 import React, { useState, useEffect } from 'react';
-import { Shield, Calendar, User, Activity } from 'lucide-react';
+import { Shield, Calendar, User, Activity, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import './auditlogs.css';
 
@@ -9,6 +9,7 @@ function AuditLogs() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadAuditLogs();
@@ -17,16 +18,35 @@ function AuditLogs() {
   const loadAuditLogs = async () => {
     try {
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('Not authenticated. Please login.');
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.get(
         'https://ifds-backend.onrender.com/api/audit',
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
-      setLogs(response.data.logs);
+      
+      setLogs(response.data.logs || []);
+      setError('');
     } catch (error) {
       console.error('Failed to load audit logs:', error);
-      alert('Failed to load audit logs. Admin access required.');
+      
+      if (error.response?.status === 403) {
+        setError('Access Denied: Only administrators can view audit logs.');
+      } else if (error.response?.status === 401) {
+        setError('Unauthorized: Please login again.');
+      } else {
+        setError('Failed to load audit logs. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,7 +79,29 @@ function AuditLogs() {
   });
 
   if (loading) {
-    return <div className="loading">Loading audit logs...</div>;
+    return (
+      <div className="audit-logs-page">
+        <div className="loading">
+          <Activity size={48} className="spinner" />
+          <p>Loading audit logs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="audit-logs-page">
+        <div className="error-container">
+          <AlertCircle size={64} color="#ef4444" />
+          <h2>Access Denied</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.href = '/dashboard'} className="back-btn">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -132,6 +174,7 @@ function AuditLogs() {
           <div className="no-logs">
             <Shield size={48} color="#9ca3af" />
             <p>No audit logs found</p>
+            {searchTerm && <p style={{ fontSize: '14px', marginTop: '8px' }}>Try adjusting your search or filter</p>}
           </div>
         ) : (
           filteredLogs.map((log) => (
@@ -143,7 +186,14 @@ function AuditLogs() {
                 </div>
                 <div className="log-timestamp">
                   <Calendar size={14} />
-                  {new Date(log.timestamp).toLocaleString()}
+                  {new Date(log.timestamp).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}
                 </div>
               </div>
 
@@ -154,7 +204,7 @@ function AuditLogs() {
                   {log.user_id && <span className="user-id">ID: {log.user_id}</span>}
                 </div>
                 <p className="log-description">{log.details}</p>
-                {log.ip_address && (
+                {log.ip_address && log.ip_address !== 'system' && (
                   <div className="log-ip">
                     <span>IP Address: {log.ip_address}</span>
                   </div>
@@ -164,6 +214,16 @@ function AuditLogs() {
           ))
         )}
       </div>
+
+      {/* Footer Info */}
+      {filteredLogs.length > 0 && (
+        <div className="logs-footer">
+          <p>Showing {filteredLogs.length} of {logs.length} logs</p>
+          <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
+            Read-only view • No delete or edit operations available
+          </p>
+        </div>
+      )}
     </div>
   );
 }
