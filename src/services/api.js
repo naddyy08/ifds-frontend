@@ -31,7 +31,7 @@ export const register = (userData) => api.post('/auth/register', userData);
 export const getProfile = () => api.get('/auth/profile');
 
 // Inventory
-export const getAllInventory = () => api.get('/inventory/');
+export const getAllInventory = (options = {}) => api.get('/inventory/', options);
 export const getInventoryById = (id) => api.get(`/inventory/${id}`);
 export const addInventory = (data) => api.post('/inventory/', data);
 export const updateInventory = (id, data) => api.put(`/inventory/${id}`, data);
