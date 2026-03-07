@@ -169,6 +169,7 @@ function Reports() {
             </button>
           </div>
 
+
           {/* Show category summary for daily inventory report */}
           {selectedReport === 'daily' && reportData.category_summary && (
             <div className="category-summary" style={{ marginBottom: 24 }}>
@@ -195,6 +196,60 @@ function Reports() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Show weekly fraud summary visually */}
+          {selectedReport === 'weekly-fraud' && reportData.summary && (
+            <div className="fraud-summary" style={{ marginBottom: 24 }}>
+              <h3>Fraud Summary</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Severity</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>High</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Medium</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Low</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>Count</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_severity.high}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_severity.medium}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_severity.low}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 16 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Status</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Pending</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Resolved</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Dismissed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>Count</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_status.pending}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_status.resolved}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.by_status.dismissed}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ marginTop: 16 }}>
+                <h4>Alert Types</h4>
+                <ul>
+                  {Object.entries(reportData.summary.by_type).map(([type, count]) => (
+                    <li key={type}><strong>{type}:</strong> {count}</li>
+                  ))}
+                </ul>
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <h4>Total Alerts: {reportData.summary.total_alerts}</h4>
+              </div>
             </div>
           )}
 
