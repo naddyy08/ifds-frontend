@@ -7,6 +7,7 @@ import {
   TrendingUp,
   AlertTriangle,
   FileText,
+  Shield,
 } from 'lucide-react';
 import './sidebar.css';
 
@@ -54,6 +55,12 @@ function Sidebar() {
       icon: FileText, 
       label: 'Reports',
       allowedRoles: ['admin', 'manager'] // Only admin and manager
+    },
+    { 
+      path: '/audit-logs',  // ← ADD THIS
+      icon: Shield,         // Import Shield from lucide-react
+      label: 'Audit Logs',
+      allowedRoles: ['admin']  // ONLY ADMIN
     },
   ];
 

@@ -18,17 +18,53 @@ function Inventory() {
     unit_price: '',
     supplier_name: '',
   });
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+
 
   useEffect(() => {
     loadInventory();
-  }, []);
+    // eslint-disable-next-line
+  }, [category]);
+
+  useEffect(() => {
+    // Extract unique categories from items after load
+    if (items.length > 0) {
+      const unique = Array.from(new Set(items.map(i => i.category)));
+      setCategories(unique);
+    }
+  }, [items]);
 
   const loadInventory = async () => {
+    setLoading(true);
     try {
-      const response = await getAllInventory();
+      let response;
+      if (category) {
+        response = await getAllInventory({ params: { category } });
+      } else {
+        response = await getAllInventory();
+      }
       setItems(response.data.items);
     } catch (error) {
       console.error('Failed to load inventory:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (!search) {
+        loadInventory();
+        return;
+      }
+      const response = await import('../services/api').then(api => api.searchInventory(search));
+      setItems(response.data.items);
+    } catch (error) {
+      alert('Search failed');
     } finally {
       setLoading(false);
     }
@@ -80,6 +116,28 @@ function Inventory() {
           Add New Item
         </button>
       </div>
+
+      {/* Search and Category Filter */}
+      <form className="search-filter-row" onSubmit={handleSearch} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <input
+          type="text"
+          placeholder="Search by item name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 2, padding: 10, borderRadius: 5, border: '1px solid #ddd' }}
+        />
+        <select
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+          style={{ flex: 1, padding: 10, borderRadius: 5, border: '1px solid #ddd' }}
+        >
+          <option value="">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        <button type="submit" className="add-btn" style={{ padding: '10px 20px' }}>Search</button>
+      </form>
 
       {showAddForm && (
         <div className="add-form-container">

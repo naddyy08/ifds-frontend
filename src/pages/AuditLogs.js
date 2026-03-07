@@ -25,15 +25,14 @@ function AuditLogs() {
         return;
       }
 
-      const response = await axios.get(
-        'https://ifds-backend.onrender.com/api/audit',
-        {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axios({
+      method: 'GET',
+      url: 'https://ifds-backend.onrender.com/api/audit',
+      headers: { 
+        'Authorization': `Bearer ${token}`
+      },
+      withCredentials: false  // Add this
+    });
       
       setLogs(response.data.logs || []);
       setError('');
