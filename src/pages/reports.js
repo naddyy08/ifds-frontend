@@ -253,6 +253,61 @@ function Reports() {
             </div>
           )}
 
+          {/* Show monthly analytics visually */}
+          {selectedReport === 'monthly' && reportData.summary && (
+            <div className="monthly-summary" style={{ marginBottom: 24 }}>
+              <h3>Monthly Transaction Analytics</h3>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Month:</strong> {reportData.period?.month_name} {reportData.period?.year}
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Transactions</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Stock In</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Stock Out</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Waste</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Stock In</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Stock Out</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Waste</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_transactions}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.stock_in_count}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.stock_out_count}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.waste_count}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_stock_in}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_stock_out}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_waste}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ marginTop: 16 }}>
+                <h4>Top 5 Most Used Items</h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                  <thead>
+                    <tr style={{ background: '#f3f4f6' }}>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Item Name</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Stock Out</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Waste</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.top_5_most_used_items?.map((item) => (
+                      <tr key={item.item_name}>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.item_name}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.stock_out}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.waste}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           <div className="report-content">
             <pre>{JSON.stringify(reportData, null, 2)}</pre>
           </div>
