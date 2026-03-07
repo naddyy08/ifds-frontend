@@ -355,6 +355,100 @@ function Reports() {
             </div>
           )}
 
+          {/* Show low stock alert visually */}
+          {selectedReport === 'low-stock' && reportData.summary && (
+            <div className="low-stock-summary" style={{ marginBottom: 24 }}>
+              <h3>Low Stock Alert</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Low Stock</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Out of Stock</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Critical</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_low_stock}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.out_of_stock_count}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.critical_count}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ marginTop: 16 }}>
+                <h4>Out of Stock Items</h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                  <thead>
+                    <tr style={{ background: '#f3f4f6' }}>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Item Name</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Category</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Supplier</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.out_of_stock?.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.item_name}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.category}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.supplier_name || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <h4>Critical Low Stock Items</h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                  <thead>
+                    <tr style={{ background: '#f3f4f6' }}>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Item Name</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Category</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Quantity</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Unit</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Supplier</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.critical_items?.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.item_name}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.category}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.quantity}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.unit}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.supplier_name || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <h4>All Low Stock Items</h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                  <thead>
+                    <tr style={{ background: '#f3f4f6' }}>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Item Name</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Category</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Quantity</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Unit</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Supplier</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.all_low_stock?.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.item_name}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.category}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.quantity}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.unit}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.supplier_name || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           <div className="report-content">
             <pre>{JSON.stringify(reportData, null, 2)}</pre>
           </div>
