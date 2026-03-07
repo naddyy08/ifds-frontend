@@ -308,6 +308,53 @@ function Reports() {
             </div>
           )}
 
+          {/* Show waste analysis visually */}
+          {selectedReport === 'waste' && reportData.summary && (
+            <div className="waste-summary" style={{ marginBottom: 24 }}>
+              <h3>Waste Analysis</h3>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Period:</strong> {reportData.period?.start_date} to {reportData.period?.end_date}
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Waste Transactions</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Estimated Waste Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_waste_transactions}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>${reportData.summary.estimated_waste_value}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ marginTop: 16 }}>
+                <h4>Top 5 Most Wasted Items</h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                  <thead>
+                    <tr style={{ background: '#f3f4f6' }}>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Item Name</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Quantity</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Unit</th>
+                      <th style={{ padding: 8, border: '1px solid #eee' }}>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.top_5_most_wasted?.map((item) => (
+                      <tr key={item.item_name}>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.item_name}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.quantity}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.unit}</td>
+                        <td style={{ padding: 8, border: '1px solid #eee' }}>{item.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           <div className="report-content">
             <pre>{JSON.stringify(reportData, null, 2)}</pre>
           </div>
