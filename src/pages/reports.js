@@ -169,6 +169,35 @@ function Reports() {
             </button>
           </div>
 
+          {/* Show category summary for daily inventory report */}
+          {selectedReport === 'daily' && reportData.category_summary && (
+            <div className="category-summary" style={{ marginBottom: 24 }}>
+              <h3>Category Summary</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                <thead>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Category</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Items</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Quantity</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Total Value</th>
+                    <th style={{ padding: 8, border: '1px solid #eee' }}>Low Stock Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(reportData.category_summary).map(([cat, val]) => (
+                    <tr key={cat}>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>{cat}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>{val.total_items}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>{val.total_quantity}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>${val.total_value}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>{val.low_stock_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           <div className="report-content">
             <pre>{JSON.stringify(reportData, null, 2)}</pre>
           </div>
