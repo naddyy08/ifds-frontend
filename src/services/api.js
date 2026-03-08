@@ -1,9 +1,3 @@
-// User Management (Admin)
-export const getAllUsers = () => api.get('/users/');
-export const createUser = (data) => api.post('/users/', data);
-export const updateUser = (id, data) => api.put(`/users/${id}`, data);
-export const deleteUser = (id) => api.delete(`/users/${id}`);
-export const deactivateUser = (id) => api.patch(`/users/${id}/deactivate`);
 // src/services/api.js
 import axios from 'axios';
 
@@ -67,5 +61,21 @@ export const getUserActivity = () => api.get('/reports/user-activity');
 export const getLowStockAlert = () => api.get('/reports/low-stock-alert');
 export const getWasteAnalysis = () => api.get('/reports/waste-analysis');
 export const getDashboardSummary = () => api.get('/reports/dashboard-summary');
+
+// User Management (Admin)
+export const getAllUsers = () => api.get('/users/');
+export const createUser = (data) => api.post('/users/', data);
+export const updateUser = (id, data) => api.put(`/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/users/${id}`);
+export const deactivateUser = (id) => api.patch(`/users/${id}/deactivate`);
+
+// System Settings (Admin)
+export const getSystemSettings = () => api.get('/settings/');
+export const updateSystemSettings = (data) => api.put('/settings/', data);
+
+// Backup (Admin)
+export const triggerBackup = () => api.post('/settings/backup');
+export const getBackupHistory = () => api.get('/settings/backup/history');
+export const downloadBackup = (filename) => api.get(`/settings/backup/download/${filename}`, { responseType: 'blob' });
 
 export default api;
