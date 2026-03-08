@@ -62,6 +62,12 @@ function Sidebar() {
       label: 'Audit Logs',
       allowedRoles: ['admin']  // ONLY ADMIN
     },
+    {
+      path: '/system-settings',
+      icon: FileText,
+      label: 'System Settings',
+      allowedRoles: ['admin']
+    },
   ];
 
   // Filter menu items based on user role

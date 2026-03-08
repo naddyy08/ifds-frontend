@@ -80,6 +80,15 @@ function App() {
                           </ProtectedRoute>
                         } 
                       />
+                      {/* System Settings - ONLY admin */}
+                      <Route
+                        path="/system-settings"
+                        element={
+                          <ProtectedRoute allowedRoles={['admin']}>
+                            {React.createElement(require('./pages/SystemSettings').default)}
+                          </ProtectedRoute>
+                        }
+                      />
                       
                       {/* Default redirect */}
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
