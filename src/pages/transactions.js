@@ -112,6 +112,7 @@ function Transactions() {
     }
   };
 
+  // ✅ NOW BEING USED - Color coding for risk levels
   const getRiskColor = (riskLevel) => {
     switch(riskLevel) {
       case 'high': return '#ef4444';
@@ -315,34 +316,69 @@ function Transactions() {
                     </p>
                   )}
 
-                  {/* AI Analysis Display */}
+                  {/* ✅ ENHANCED: AI Analysis Display with Color-Coded Risk */}
                   {trans.is_flagged && (
                     <div style={{
                       marginTop: '12px',
-                      padding: '10px',
+                      padding: '12px',
                       backgroundColor: '#fef2f2',
-                      borderLeft: '3px solid #ef4444',
-                      borderRadius: '4px'
+                      borderLeft: `4px solid ${getRiskColor(trans.ai_analysis?.risk_level || 'high')}`,
+                      borderRadius: '6px'
                     }}>
                       <div style={{ 
                         display: 'flex', 
                         alignItems: 'center', 
                         gap: '8px',
-                        marginBottom: '6px'
+                        marginBottom: '8px'
                       }}>
-                        <Shield size={16} color="#dc2626" />
-                        <strong style={{ color: '#dc2626', fontSize: '13px' }}>
+                        <Shield size={16} color={getRiskColor(trans.ai_analysis?.risk_level || 'high')} />
+                        <strong style={{ 
+                          color: getRiskColor(trans.ai_analysis?.risk_level || 'high'), 
+                          fontSize: '14px' 
+                        }}>
                           AI Fraud Alert
                         </strong>
+                        
+                        {/* Risk Score Badge */}
+                        {trans.ai_analysis?.ml_risk_score !== undefined && (
+                          <span style={{
+                            marginLeft: 'auto',
+                            padding: '3px 10px',
+                            backgroundColor: getRiskColor(trans.ai_analysis.risk_level),
+                            color: 'white',
+                            borderRadius: '12px',
+                            fontSize: '11px',
+                            fontWeight: '700'
+                          }}>
+                            Risk: {trans.ai_analysis.ml_risk_score}/100
+                          </span>
+                        )}
                       </div>
+                      
                       <p style={{ 
                         fontSize: '12px', 
                         color: '#991b1b',
-                        margin: 0 
+                        margin: '0 0 8px 0',
+                        lineHeight: '1.5'
                       }}>
                         This transaction has been flagged for potential fraud. 
                         Review required by manager or administrator.
                       </p>
+                      
+                      {/* Risk Level Indicator */}
+                      {trans.ai_analysis?.risk_level && (
+                        <div style={{
+                          display: 'inline-block',
+                          padding: '4px 8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: getRiskColor(trans.ai_analysis.risk_level)
+                        }}>
+                          Risk Level: {trans.ai_analysis.risk_level.toUpperCase()}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
