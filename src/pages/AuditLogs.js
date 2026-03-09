@@ -16,7 +16,7 @@ function AuditLogs() {
 
   const loadAuditLogs = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       
       console.log('=== AUDIT LOGS DEBUG ===');
       console.log('Token exists:', !!token);

@@ -23,7 +23,7 @@ function Login() {
       const { access_token, user } = response.data;
 
       // Save to localStorage
-      localStorage.setItem('token', access_token);
+      localStorage.setItem('access_token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
 
       // Redirect to dashboard

@@ -15,7 +15,7 @@ import './App.css';
 
 // Protected Route Component with Role Checking
 function ProtectedRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   const userStr = localStorage.getItem('user');
 
   // Not logged in - redirect to login
