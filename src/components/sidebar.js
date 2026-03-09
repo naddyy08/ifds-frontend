@@ -86,13 +86,13 @@ function Sidebar() {
           borderRadius: '8px',
           textAlign: 'center'
         }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px' }}>
+          <div style={{ fontSize: '11px', color: 'rgba(0, 0, 0, 0.7)', marginBottom: '4px' }}>
             ROLE
           </div>
           <div style={{ 
             fontSize: '13px', 
             fontWeight: '600', 
-            color: '#fff',
+            color: '#000',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
           }}>
