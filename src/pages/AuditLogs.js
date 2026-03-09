@@ -1,7 +1,7 @@
 // src/pages/AuditLogs.js
 import React, { useState, useEffect } from 'react';
 import { Shield, Calendar, User, Activity, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import './auditlogs.css';
 
 function AuditLogs() {
@@ -17,28 +17,11 @@ function AuditLogs() {
 
   const loadAuditLogs = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setError('Not authenticated. Please login.');
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios({
-      method: 'GET',
-      url: 'https://ifds-backend.onrender.com/api/audit',
-      headers: { 
-        'Authorization': `Bearer ${token}`
-      },
-      withCredentials: false  // Add this
-    });
-      
+      const response = await api.get('/audit');
       setLogs(response.data.logs || []);
       setError('');
     } catch (error) {
       console.error('Failed to load audit logs:', error);
-      
       if (error.response?.status === 403) {
         setError('Access Denied: Only administrators can view audit logs.');
       } else if (error.response?.status === 401) {
