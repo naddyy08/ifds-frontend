@@ -1,7 +1,6 @@
-// src/pages/AuditLogs.js
+// src/pages/AuditLogs.js - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { Shield, Calendar, User, Activity, AlertCircle } from 'lucide-react';
-import api from '../services/api';
 import './auditlogs.css';
 
 function AuditLogs() {
@@ -17,17 +16,60 @@ function AuditLogs() {
 
   const loadAuditLogs = async () => {
     try {
-      const response = await api.get('/audit');
-      setLogs(response.data.logs || []);
+      const token = localStorage.getItem('token');
+      
+      console.log('=== AUDIT LOGS DEBUG ===');
+      console.log('Token exists:', !!token);
+      
+      if (!token) {
+        setError('Not authenticated. Please login.');
+        setLoading(false);
+        return;
+      }
+
+      const url = 'https://ifds-backend.onrender.com/api/audit';
+      console.log('Fetching from:', url);
+
+      // Use fetch instead of axios to avoid CORS issues
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Access Denied: Only administrators can view audit logs.');
+        } else if (response.status === 401) {
+          throw new Error('Unauthorized: Your session has expired. Please login again.');
+        } else {
+          throw new Error(`Server error: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      setLogs(data.logs || []);
       setError('');
+      console.log('✅ Successfully loaded', data.logs?.length || 0, 'logs');
+      
     } catch (error) {
-      console.error('Failed to load audit logs:', error);
-      if (error.response?.status === 403) {
+      console.error('❌ Error loading audit logs:', error);
+      
+      if (error.message.includes('Access Denied')) {
         setError('Access Denied: Only administrators can view audit logs.');
-      } else if (error.response?.status === 401) {
-        setError('Unauthorized: Please login again.');
+      } else if (error.message.includes('Unauthorized')) {
+        setError('Your session has expired. Please logout and login again.');
+      } else if (error.message.includes('Failed to fetch')) {
+        setError('Cannot connect to server. The backend may be sleeping. Please wait 60 seconds and try again.');
       } else {
-        setError('Failed to load audit logs. Please try again.');
+        setError(error.message || 'Failed to load audit logs. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -36,18 +78,18 @@ function AuditLogs() {
 
   const getActionColor = (action) => {
     if (action.includes('FAILED') || action.includes('UNAUTHORIZED')) {
-      return '#ef4444'; // Red
+      return '#ef4444';
     }
     if (action.includes('LOGIN') || action.includes('LOGOUT')) {
-      return '#3b82f6'; // Blue
+      return '#3b82f6';
     }
     if (action.includes('FRAUD')) {
-      return '#f59e0b'; // Orange
+      return '#f59e0b';
     }
     if (action.includes('DELETED')) {
-      return '#dc2626'; // Dark red
+      return '#dc2626';
     }
-    return '#10b981'; // Green
+    return '#10b981';
   };
 
   const filteredLogs = logs.filter(log => {
@@ -66,6 +108,9 @@ function AuditLogs() {
         <div className="loading">
           <Activity size={48} className="spinner" />
           <p>Loading audit logs...</p>
+          <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
+            If backend is sleeping, this may take up to 60 seconds...
+          </p>
         </div>
       </div>
     );
@@ -76,11 +121,16 @@ function AuditLogs() {
       <div className="audit-logs-page">
         <div className="error-container">
           <AlertCircle size={64} color="#ef4444" />
-          <h2>Access Denied</h2>
+          <h2>Error Loading Audit Logs</h2>
           <p>{error}</p>
-          <button onClick={() => window.location.href = '/dashboard'} className="back-btn">
-            Back to Dashboard
-          </button>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+            <button onClick={loadAuditLogs} className="back-btn">
+              🔄 Retry
+            </button>
+            <button onClick={() => window.location.href = '/dashboard'} className="back-btn">
+              ← Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
