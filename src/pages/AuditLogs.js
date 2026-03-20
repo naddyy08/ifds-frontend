@@ -1,6 +1,7 @@
-// src/pages/AuditLogs.js - FIXED VERSION
+// src/pages/AuditLogs.js
 import React, { useState, useEffect } from 'react';
 import { Shield, Calendar, User, Activity, AlertCircle } from 'lucide-react';
+import { getAuditLogs } from '../services/api';
 import './auditlogs.css';
 
 function AuditLogs() {
@@ -16,60 +17,27 @@ function AuditLogs() {
 
   const loadAuditLogs = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      
-      console.log('=== AUDIT LOGS DEBUG ===');
-      console.log('Token exists:', !!token);
-      
-      if (!token) {
-        setError('Not authenticated. Please login.');
-        setLoading(false);
-        return;
-      }
-
-      const url = 'https://ifds-backend.onrender.com/api/audit';
-      console.log('Fetching from:', url);
-
-      // Use fetch instead of axios to avoid CORS issues
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error('Access Denied: Only administrators can view audit logs.');
-        } else if (response.status === 401) {
-          throw new Error('Unauthorized: Your session has expired. Please login again.');
-        } else {
-          throw new Error(`Server error: ${response.status}`);
-        }
-      }
-
-      const data = await response.json();
-      console.log('Response data:', data);
-      
-      setLogs(data.logs || []);
+      setLoading(true);
       setError('');
-      console.log('✅ Successfully loaded', data.logs?.length || 0, 'logs');
-      
+
+      const response = await getAuditLogs();
+      setLogs(response.data.logs || []);
+
+      console.log('✅ Successfully loaded', response.data.logs?.length || 0, 'logs');
+
     } catch (error) {
       console.error('❌ Error loading audit logs:', error);
-      
-      if (error.message.includes('Access Denied')) {
+
+      if (error.response?.status === 403) {
         setError('Access Denied: Only administrators can view audit logs.');
-      } else if (error.message.includes('Unauthorized')) {
+      } else if (error.response?.status === 401) {
         setError('Your session has expired. Please logout and login again.');
-      } else if (error.message.includes('Failed to fetch')) {
-        setError('Cannot connect to server. The backend may be sleeping. Please wait 60 seconds and try again.');
+      } else if (error.response?.status === 404) {
+        setError('Audit logs endpoint not found. Please check backend configuration.');
+      } else if (error.response?.status >= 500) {
+        setError('Server error. Please try again later.');
       } else {
-        setError(error.message || 'Failed to load audit logs. Please try again.');
+        setError('Cannot connect to server. Please check your connection and try again.');
       }
     } finally {
       setLoading(false);
@@ -77,28 +45,16 @@ function AuditLogs() {
   };
 
   const getActionColor = (action) => {
-    if (action.includes('FAILED') || action.includes('UNAUTHORIZED')) {
-      return '#ef4444';
-    }
-    if (action.includes('LOGIN') || action.includes('LOGOUT')) {
-      return '#3b82f6';
-    }
-    if (action.includes('FRAUD')) {
-      return '#f59e0b';
-    }
-    if (action.includes('DELETED')) {
-      return '#dc2626';
-    }
+    if (action.includes('FAILED') || action.includes('UNAUTHORIZED')) return '#ef4444';
+    if (action.includes('LOGIN') || action.includes('LOGOUT')) return '#3b82f6';
+    if (action.includes('FRAUD')) return '#f59e0b';
+    if (action.includes('DELETED')) return '#dc2626';
     return '#10b981';
   };
 
   const filteredLogs = logs.filter(log => {
-    if (filter !== 'all' && !log.action.toLowerCase().includes(filter)) {
-      return false;
-    }
-    if (searchTerm && !log.details.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
+    if (filter !== 'all' && !log.action.toLowerCase().includes(filter)) return false;
+    if (searchTerm && !log.details?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   });
 
@@ -108,9 +64,6 @@ function AuditLogs() {
         <div className="loading">
           <Activity size={48} className="spinner" />
           <p>Loading audit logs...</p>
-          <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
-            If backend is sleeping, this may take up to 60 seconds...
-          </p>
         </div>
       </div>
     );
@@ -156,25 +109,25 @@ function AuditLogs() {
       {/* Filters */}
       <div className="filters-section">
         <div className="filter-buttons">
-          <button 
+          <button
             className={filter === 'all' ? 'filter-btn active' : 'filter-btn'}
             onClick={() => setFilter('all')}
           >
             All Actions
           </button>
-          <button 
+          <button
             className={filter === 'login' ? 'filter-btn active' : 'filter-btn'}
             onClick={() => setFilter('login')}
           >
             Authentication
           </button>
-          <button 
+          <button
             className={filter === 'fraud' ? 'filter-btn active' : 'filter-btn'}
             onClick={() => setFilter('fraud')}
           >
             Fraud Events
           </button>
-          <button 
+          <button
             className={filter === 'unauthorized' ? 'filter-btn active' : 'filter-btn'}
             onClick={() => setFilter('unauthorized')}
           >
@@ -206,7 +159,11 @@ function AuditLogs() {
           <div className="no-logs">
             <Shield size={48} color="#9ca3af" />
             <p>No audit logs found</p>
-            {searchTerm && <p style={{ fontSize: '14px', marginTop: '8px' }}>Try adjusting your search or filter</p>}
+            {searchTerm && (
+              <p style={{ fontSize: '14px', marginTop: '8px' }}>
+                Try adjusting your search or filter
+              </p>
+            )}
           </div>
         ) : (
           filteredLogs.map((log) => (

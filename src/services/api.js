@@ -62,6 +62,11 @@ export const getLowStockAlert = () => api.get('/reports/low-stock-alert');
 export const getWasteAnalysis = () => api.get('/reports/waste-analysis');
 export const getDashboardSummary = () => api.get('/reports/dashboard-summary');
 
+// Audit Logs (Admin)
+export const getAuditLogs = (params = {}) => api.get('/audit/', { params });
+export const getAuditLogById = (id) => api.get(`/audit/${id}`);
+export const getAuditStatistics = () => api.get('/audit/statistics');
+
 // User Management (Admin)
 export const getAllUsers = () => api.get('/users/');
 export const createUser = (data) => api.post('/users/', data);
