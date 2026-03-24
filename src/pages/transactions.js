@@ -26,6 +26,7 @@ function Transactions() {
   const [activeTab, setActiveTab] = useState('view');
   const [transactionType, setTransactionType] = useState('stock_in');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [itemSearch, setItemSearch] = useState('');
   const [formData, setFormData] = useState({
     inventory_id: '',
     quantity: '',
@@ -54,15 +55,23 @@ function Transactions() {
     }
   };
 
-  // Filter inventory by selected category
-  const filteredInventory = selectedCategory
-    ? inventory.filter((item) => item.category === selectedCategory)
-    : inventory;
+  // Filter inventory by category AND item name search
+  const filteredInventory = inventory.filter((item) => {
+    const matchesCategory = selectedCategory ? item.category === selectedCategory : true;
+    const matchesSearch = itemSearch
+      ? item.item_name.toLowerCase().includes(itemSearch.toLowerCase())
+      : true;
+    return matchesCategory && matchesSearch;
+  });
 
   const handleCategorySelect = (category) => {
-    // Toggle off if same category clicked again
     setSelectedCategory((prev) => (prev === category ? '' : category));
-    // Reset item selection when category changes
+    setFormData((prev) => ({ ...prev, inventory_id: '' }));
+  };
+
+  const handleItemSearchChange = (e) => {
+    setItemSearch(e.target.value);
+    // Reset selected item when search changes
     setFormData((prev) => ({ ...prev, inventory_id: '' }));
   };
 
@@ -108,18 +117,14 @@ function Transactions() {
         alert('✅ Transaction recorded successfully!');
       }
 
-      setFormData({
-        inventory_id: '',
-        quantity: '',
-        reason: '',
-        reference_no: '',
-      });
+      // Reset all fields
+      setFormData({ inventory_id: '', quantity: '', reason: '', reference_no: '' });
       setSelectedCategory('');
+      setItemSearch('');
       loadData();
 
     } catch (error) {
       console.error('Transaction error:', error);
-
       if (error.response?.data?.fraud_warning) {
         alert(`Transaction recorded but flagged: ${error.response.data.fraud_warning.message}`);
       } else {
@@ -170,22 +175,19 @@ function Transactions() {
               className={transactionType === 'stock_in' ? 'type-btn active in' : 'type-btn in'}
               onClick={() => setTransactionType('stock_in')}
             >
-              <TrendingUp size={20} />
-              Stock IN
+              <TrendingUp size={20} /> Stock IN
             </button>
             <button
               className={transactionType === 'stock_out' ? 'type-btn active out' : 'type-btn out'}
               onClick={() => setTransactionType('stock_out')}
             >
-              <TrendingDown size={20} />
-              Stock OUT
+              <TrendingDown size={20} /> Stock OUT
             </button>
             <button
               className={transactionType === 'waste' ? 'type-btn active waste' : 'type-btn waste'}
               onClick={() => setTransactionType('waste')}
             >
-              <Trash2 size={20} />
-              Waste
+              <Trash2 size={20} /> Waste
             </button>
           </div>
 
@@ -208,7 +210,7 @@ function Transactions() {
 
           <form onSubmit={handleSubmit} className="transaction-form">
 
-            {/* Item Name / Category Filter */}
+            {/* Step 1: Category Filter */}
             <div style={{ marginBottom: '12px' }}>
               <label style={{
                 display: 'block',
@@ -217,13 +219,9 @@ function Transactions() {
                 color: '#374151',
                 marginBottom: '8px'
               }}>
-                Item Category <span style={{ color: '#9ca3af', fontWeight: 400 }}>(filter by category first)</span>
+                Item Category <span style={{ color: '#9ca3af', fontWeight: 400 }}>(optional — filter by category)</span>
               </label>
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '8px',
-              }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
@@ -247,21 +245,52 @@ function Transactions() {
                   </button>
                 ))}
               </div>
-              {selectedCategory && (
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px' }}>
-                  Showing {filteredInventory.length} item{filteredInventory.length !== 1 ? 's' : ''} in <strong>{selectedCategory}</strong>
+            </div>
+
+            {/* Step 2: Item Name Search */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '6px'
+              }}>
+                Item Name <span style={{ color: '#9ca3af', fontWeight: 400 }}>(type to search)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Type item name to search..."
+                value={itemSearch}
+                onChange={handleItemSearchChange}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+              {(selectedCategory || itemSearch) && (
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  {filteredInventory.length} item{filteredInventory.length !== 1 ? 's' : ''} found
+                  {selectedCategory && <> in <strong>{selectedCategory}</strong></>}
+                  {itemSearch && <> matching "<strong>{itemSearch}</strong>"</>}
                   {' — '}
                   <span
                     style={{ color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => handleCategorySelect(selectedCategory)}
+                    onClick={() => { setSelectedCategory(''); setItemSearch(''); setFormData(p => ({ ...p, inventory_id: '' })); }}
                   >
-                    Clear filter
+                    Clear all filters
                   </span>
                 </p>
               )}
             </div>
 
-            {/* Select Item Dropdown */}
+            {/* Step 3: Select Item Dropdown (filtered) */}
             <select
               value={formData.inventory_id}
               onChange={(e) => setFormData({ ...formData, inventory_id: e.target.value })}
@@ -269,7 +298,9 @@ function Transactions() {
               disabled={loading}
             >
               <option value="">
-                {selectedCategory ? `Select Item from ${selectedCategory}` : 'Select Item'}
+                {filteredInventory.length === 0
+                  ? 'No items found — try different filters'
+                  : `Select Item (${filteredInventory.length} available)`}
               </option>
               {filteredInventory.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -335,17 +366,14 @@ function Transactions() {
                       {trans.transaction_type === 'stock_out' && '📤 STOCK OUT'}
                       {trans.transaction_type === 'waste' && '🗑️ WASTE'}
                     </span>
-
                     {trans.is_flagged && (
                       <div className="fraud-indicators">
                         <span className="flagged-badge">
-                          <AlertTriangle size={14} />
-                          FLAGGED
+                          <AlertTriangle size={14} /> FLAGGED
                         </span>
                       </div>
                     )}
                   </div>
-
                   <span className="trans-date">
                     {new Date(trans.timestamp).toLocaleString()}
                   </span>
@@ -353,9 +381,7 @@ function Transactions() {
 
                 <div className="trans-body">
                   <div className="trans-main-info">
-                    <p className="item-name">
-                      <strong>{trans.item_name}</strong>
-                    </p>
+                    <p className="item-name"><strong>{trans.item_name}</strong></p>
                     <p className="quantity-info">
                       <span className="label">Quantity:</span>
                       <span className={`value ${trans.transaction_type}`}>
@@ -370,80 +396,45 @@ function Transactions() {
                       {trans.new_quantity}
                     </p>
                   </div>
-
                   {trans.reason && (
-                    <p className="trans-reason">
-                      <span className="label">Reason:</span> {trans.reason}
-                    </p>
+                    <p className="trans-reason"><span className="label">Reason:</span> {trans.reason}</p>
                   )}
-
                   {trans.reference_no && (
-                    <p className="trans-ref">
-                      <span className="label">Ref:</span> {trans.reference_no}
-                    </p>
+                    <p className="trans-ref"><span className="label">Ref:</span> {trans.reference_no}</p>
                   )}
-
                   {trans.username && (
-                    <p className="trans-user">
-                      <span className="label">By:</span> {trans.username}
-                    </p>
+                    <p className="trans-user"><span className="label">By:</span> {trans.username}</p>
                   )}
-
                   {trans.is_flagged && (
                     <div style={{
-                      marginTop: '12px',
-                      padding: '12px',
+                      marginTop: '12px', padding: '12px',
                       backgroundColor: '#fef2f2',
                       borderLeft: `4px solid ${getRiskColor(trans.ai_analysis?.risk_level || 'high')}`,
                       borderRadius: '6px'
                     }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginBottom: '8px'
-                      }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                         <Shield size={16} color={getRiskColor(trans.ai_analysis?.risk_level || 'high')} />
-                        <strong style={{
-                          color: getRiskColor(trans.ai_analysis?.risk_level || 'high'),
-                          fontSize: '14px'
-                        }}>
+                        <strong style={{ color: getRiskColor(trans.ai_analysis?.risk_level || 'high'), fontSize: '14px' }}>
                           AI Fraud Alert
                         </strong>
-
                         {trans.ai_analysis?.ml_risk_score !== undefined && (
                           <span style={{
-                            marginLeft: 'auto',
-                            padding: '3px 10px',
+                            marginLeft: 'auto', padding: '3px 10px',
                             backgroundColor: getRiskColor(trans.ai_analysis.risk_level),
-                            color: 'white',
-                            borderRadius: '12px',
-                            fontSize: '11px',
-                            fontWeight: '700'
+                            color: 'white', borderRadius: '12px', fontSize: '11px', fontWeight: '700'
                           }}>
                             Risk: {trans.ai_analysis.ml_risk_score}/100
                           </span>
                         )}
                       </div>
-
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#991b1b',
-                        margin: '0 0 8px 0',
-                        lineHeight: '1.5'
-                      }}>
-                        This transaction has been flagged for potential fraud.
-                        Review required by manager or administrator.
+                      <p style={{ fontSize: '12px', color: '#991b1b', margin: '0 0 8px 0', lineHeight: '1.5' }}>
+                        This transaction has been flagged for potential fraud. Review required by manager or administrator.
                       </p>
-
                       {trans.ai_analysis?.risk_level && (
                         <div style={{
-                          display: 'inline-block',
-                          padding: '4px 8px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: '600',
+                          display: 'inline-block', padding: '4px 8px',
+                          backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: '4px',
+                          fontSize: '11px', fontWeight: '600',
                           color: getRiskColor(trans.ai_analysis.risk_level)
                         }}>
                           Risk Level: {trans.ai_analysis.risk_level.toUpperCase()}
