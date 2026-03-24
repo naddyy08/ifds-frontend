@@ -287,7 +287,7 @@ function Inventory() {
               <p><strong>Category:</strong> {item.category}</p>
               <p><strong>Quantity:</strong> {item.quantity} {item.unit}</p>
               <p><strong>Reorder Level:</strong> {item.reorder_level} {item.unit}</p>
-              <p><strong>Unit Price:</strong> ${item.unit_price}</p>
+              <p><strong>Unit Price:</strong> RM{item.unit_price}</p>
               {item.supplier_name && (
                 <p><strong>Supplier:</strong> {item.supplier_name}</p>
               )}
@@ -377,7 +377,7 @@ function Inventory() {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Unit Price ($)</label>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Unit Price (RM)</label>
                   <input
                     type="number"
                     step="0.01"
