@@ -25,8 +25,7 @@ function Transactions() {
   const [inventory, setInventory] = useState([]);
   const [activeTab, setActiveTab] = useState('view');
   const [transactionType, setTransactionType] = useState('stock_in');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [itemSearch, setItemSearch] = useState('');
+  const [itemName, setItemName] = useState('');
   const [formData, setFormData] = useState({
     inventory_id: '',
     quantity: '',
@@ -55,24 +54,16 @@ function Transactions() {
     }
   };
 
-  // Filter inventory by category AND item name search
-  const filteredInventory = inventory.filter((item) => {
-    const matchesCategory = selectedCategory ? item.category === selectedCategory : true;
-    const matchesSearch = itemSearch
-      ? item.item_name.toLowerCase().includes(itemSearch.toLowerCase())
-      : true;
-    return matchesCategory && matchesSearch;
-  });
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory((prev) => (prev === category ? '' : category));
-    setFormData((prev) => ({ ...prev, inventory_id: '' }));
-  };
-
-  const handleItemSearchChange = (e) => {
-    setItemSearch(e.target.value);
-    // Reset selected item when search changes
-    setFormData((prev) => ({ ...prev, inventory_id: '' }));
+  // When user selects an item from dropdown, auto-fill Item Name
+  const handleSelectItem = (e) => {
+    const selectedId = e.target.value;
+    setFormData({ ...formData, inventory_id: selectedId });
+    if (selectedId) {
+      const found = inventory.find((i) => String(i.id) === String(selectedId));
+      if (found) setItemName(found.item_name);
+    } else {
+      setItemName('');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -81,7 +72,6 @@ function Transactions() {
 
     try {
       let response;
-
       if (transactionType === 'stock_in') {
         response = await stockIn(formData);
       } else if (transactionType === 'stock_out') {
@@ -98,19 +88,16 @@ function Transactions() {
         const riskScore = data.ai_analysis?.ml_risk_score || 0;
 
         let alertMessage = `⚠️ FRAUD ALERT!\n\n${alertCount}\n\n`;
-
         if (mlDetected) {
           alertMessage += `🤖 AI Risk Score: ${riskScore}/100\n`;
           alertMessage += `Risk Level: ${data.ai_analysis.risk_level.toUpperCase()}\n\n`;
         }
-
         if (data.fraud_warning.rule_based_alerts?.length > 0) {
           alertMessage += 'Detected Issues:\n';
           data.fraud_warning.rule_based_alerts.forEach((alert, index) => {
             alertMessage += `${index + 1}. ${alert.alert_type.replace(/_/g, ' ')}\n`;
           });
         }
-
         alertMessage += '\n⚠️ This transaction has been flagged for review.';
         alert(alertMessage);
       } else {
@@ -119,8 +106,7 @@ function Transactions() {
 
       // Reset all fields
       setFormData({ inventory_id: '', quantity: '', reason: '', reference_no: '' });
-      setSelectedCategory('');
-      setItemSearch('');
+      setItemName('');
       loadData();
 
     } catch (error) {
@@ -210,45 +196,8 @@ function Transactions() {
 
           <form onSubmit={handleSubmit} className="transaction-form">
 
-            {/* Step 1: Category Filter */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
-                Item Category <span style={{ color: '#9ca3af', fontWeight: 400 }}>(optional — filter by category)</span>
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => handleCategorySelect(cat)}
-                    disabled={loading}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '20px',
-                      border: selectedCategory === cat ? '2px solid #667eea' : '2px solid #e5e7eb',
-                      backgroundColor: selectedCategory === cat ? '#667eea' : '#ffffff',
-                      color: selectedCategory === cat ? '#ffffff' : '#374151',
-                      fontSize: '13px',
-                      fontWeight: selectedCategory === cat ? '600' : '400',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Step 2: Item Name Search */}
-            <div style={{ marginBottom: '12px' }}>
+            {/* Item Name — read-only, auto-filled when item selected */}
+            <div style={{ marginBottom: '4px' }}>
               <label style={{
                 display: 'block',
                 fontSize: '13px',
@@ -256,13 +205,13 @@ function Transactions() {
                 color: '#374151',
                 marginBottom: '6px'
               }}>
-                Item Name <span style={{ color: '#9ca3af', fontWeight: 400 }}>(type to search)</span>
+                Item Name
               </label>
               <input
                 type="text"
-                placeholder="Type item name to search..."
-                value={itemSearch}
-                onChange={handleItemSearchChange}
+                placeholder="Auto-filled when you select an item below..."
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
                 disabled={loading}
                 style={{
                   width: '100%',
@@ -270,44 +219,58 @@ function Transactions() {
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
                   fontSize: '14px',
-                  outline: 'none',
+                  backgroundColor: itemName ? '#f0fdf4' : '#fff',
                   boxSizing: 'border-box',
+                  color: '#374151',
                 }}
               />
-              {(selectedCategory || itemSearch) && (
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                  {filteredInventory.length} item{filteredInventory.length !== 1 ? 's' : ''} found
-                  {selectedCategory && <> in <strong>{selectedCategory}</strong></>}
-                  {itemSearch && <> matching "<strong>{itemSearch}</strong>"</>}
-                  {' — '}
-                  <span
-                    style={{ color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => { setSelectedCategory(''); setItemSearch(''); setFormData(p => ({ ...p, inventory_id: '' })); }}
-                  >
-                    Clear all filters
-                  </span>
-                </p>
-              )}
             </div>
 
-            {/* Step 3: Select Item Dropdown (filtered) */}
-            <select
-              value={formData.inventory_id}
-              onChange={(e) => setFormData({ ...formData, inventory_id: e.target.value })}
-              required
-              disabled={loading}
-            >
-              <option value="">
-                {filteredInventory.length === 0
-                  ? 'No items found — try different filters'
-                  : `Select Item (${filteredInventory.length} available)`}
-              </option>
-              {filteredInventory.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.item_name} (Stock: {item.quantity} {item.unit})
-                </option>
-              ))}
-            </select>
+            {/* Select Item — grouped by category */}
+            <div style={{ marginBottom: '4px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '6px'
+              }}>
+                Select Item
+              </label>
+              <select
+                value={formData.inventory_id}
+                onChange={handleSelectItem}
+                required
+                disabled={loading}
+              >
+                <option value="">— Select Item —</option>
+                {CATEGORIES.map((cat) => {
+                  const itemsInCat = inventory.filter((i) => i.category === cat);
+                  if (itemsInCat.length === 0) return null;
+                  return (
+                    <optgroup key={cat} label={cat}>
+                      {itemsInCat.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.item_name} (Stock: {item.quantity} {item.unit})
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+                {/* Items with no matching category */}
+                {inventory.filter((i) => !CATEGORIES.includes(i.category)).length > 0 && (
+                  <optgroup label="Other">
+                    {inventory
+                      .filter((i) => !CATEGORIES.includes(i.category))
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.item_name} (Stock: {item.quantity} {item.unit})
+                        </option>
+                      ))}
+                  </optgroup>
+                )}
+              </select>
+            </div>
 
             <input
               type="number"
