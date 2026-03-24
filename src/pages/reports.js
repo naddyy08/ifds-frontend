@@ -190,7 +190,7 @@ function Reports() {
                       <td style={{ padding: 8, border: '1px solid #eee' }}>{cat}</td>
                       <td style={{ padding: 8, border: '1px solid #eee' }}>{val.total_items}</td>
                       <td style={{ padding: 8, border: '1px solid #eee' }}>{val.total_quantity}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>${val.total_value}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>RM{Number(val.total_value).toFixed(2)}</td>
                       <td style={{ padding: 8, border: '1px solid #eee' }}>{val.low_stock_count}</td>
                     </tr>
                   ))}
@@ -325,7 +325,7 @@ function Reports() {
                 <tbody>
                   <tr>
                     <td style={{ padding: 8, border: '1px solid #eee' }}>{reportData.summary.total_waste_transactions}</td>
-                    <td style={{ padding: 8, border: '1px solid #eee' }}>${reportData.summary.estimated_waste_value}</td>
+                    <td style={{ padding: 8, border: '1px solid #eee' }}>RM{Number(reportData.summary.estimated_waste_value).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
