@@ -1,7 +1,7 @@
 // src/pages/Inventory.js
 import React, { useState, useEffect } from 'react';
-import { getAllInventory, addInventory, deleteInventory } from '../services/api';
-import { Plus, AlertCircle } from 'lucide-react';
+import { getAllInventory, addInventory, deleteInventory, updateInventory } from '../services/api';
+import { Plus, AlertCircle, Pencil } from 'lucide-react';
 import RoleBasedAccess from '../components/RoleBasedAccess';
 import './inventory.css';
 
@@ -18,10 +18,14 @@ function Inventory() {
     unit_price: '',
     supplier_name: '',
   });
+
+  // Edit state
+  const [editItem, setEditItem] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState([]);
-
 
   useEffect(() => {
     loadInventory();
@@ -29,7 +33,6 @@ function Inventory() {
   }, [category]);
 
   useEffect(() => {
-    // Extract unique categories from items after load
     if (items.length > 0) {
       const unique = Array.from(new Set(items.map(i => i.category)));
       setCategories(unique);
@@ -103,6 +106,39 @@ function Inventory() {
     }
   };
 
+  // Open edit modal pre-filled with item data
+  const handleEditOpen = (item) => {
+    setEditItem({
+      id: item.id,
+      item_name: item.item_name,
+      category: item.category,
+      quantity: item.quantity,
+      unit: item.unit,
+      reorder_level: item.reorder_level,
+      unit_price: item.unit_price,
+      supplier_name: item.supplier_name || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async (e) => {
+    e.preventDefault();
+    try {
+      await updateInventory(editItem.id, editItem);
+      setShowEditModal(false);
+      setEditItem(null);
+      loadInventory();
+      alert('Item updated successfully!');
+    } catch (error) {
+      alert(error.response?.data?.error || 'Failed to update item');
+    }
+  };
+
+  const handleEditClose = () => {
+    setShowEditModal(false);
+    setEditItem(null);
+  };
+
   if (loading) {
     return <div className="loading">Loading inventory...</div>;
   }
@@ -139,6 +175,7 @@ function Inventory() {
         <button type="submit" className="add-btn" style={{ padding: '10px 20px' }}>Search</button>
       </form>
 
+      {/* Add New Item Form */}
       {showAddForm && (
         <div className="add-form-container">
           <form onSubmit={handleAddItem} className="add-form">
@@ -206,19 +243,45 @@ function Inventory() {
         </div>
       )}
 
+      {/* Inventory Grid */}
       <div className="inventory-grid">
         {items.map((item) => (
           <div key={item.id} className="inventory-card">
             <div className="card-header">
               <h3>{item.item_name}</h3>
-              <RoleBasedAccess allowedRoles={['admin']}>
-                <button 
-                  onClick={() => handleDelete(item.id)}
-                  className="delete-button"
-                >
-                  🗑️ Delete
-                </button>
-              </RoleBasedAccess>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {/* Edit button — visible to admin and manager */}
+                <RoleBasedAccess allowedRoles={['admin', 'manager']}>
+                  <button
+                    onClick={() => handleEditOpen(item)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '6px 12px',
+                      backgroundColor: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Pencil size={14} />
+                    Edit
+                  </button>
+                </RoleBasedAccess>
+                {/* Delete button — admin only */}
+                <RoleBasedAccess allowedRoles={['admin']}>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="delete-button"
+                  >
+                    🗑️ Delete
+                  </button>
+                </RoleBasedAccess>
+              </div>
             </div>
             <div className="card-body">
               <p><strong>Category:</strong> {item.category}</p>
@@ -238,6 +301,128 @@ function Inventory() {
           </div>
         ))}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editItem && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '32px',
+            width: '100%',
+            maxWidth: '520px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}>
+            <h3 style={{ margin: '0 0 24px', fontSize: '20px', color: '#1f2937' }}>
+              ✏️ Edit Item
+            </h3>
+            <form onSubmit={handleEditSave}>
+              <div className="form-row">
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Item Name *</label>
+                  <input
+                    type="text"
+                    value={editItem.item_name}
+                    onChange={(e) => setEditItem({ ...editItem, item_name: e.target.value })}
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Category *</label>
+                  <input
+                    type="text"
+                    value={editItem.category}
+                    onChange={(e) => setEditItem({ ...editItem, category: e.target.value })}
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div className="form-row" style={{ marginTop: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Quantity *</label>
+                  <input
+                    type="number"
+                    value={editItem.quantity}
+                    onChange={(e) => setEditItem({ ...editItem, quantity: e.target.value })}
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Unit *</label>
+                  <input
+                    type="text"
+                    value={editItem.unit}
+                    onChange={(e) => setEditItem({ ...editItem, unit: e.target.value })}
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div className="form-row" style={{ marginTop: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Reorder Level</label>
+                  <input
+                    type="number"
+                    value={editItem.reorder_level}
+                    onChange={(e) => setEditItem({ ...editItem, reorder_level: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Unit Price ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editItem.unit_price}
+                    onChange={(e) => setEditItem({ ...editItem, unit_price: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ marginTop: '12px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>Supplier Name</label>
+                <input
+                  type="text"
+                  value={editItem.supplier_name}
+                  onChange={(e) => setEditItem({ ...editItem, supplier_name: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1, padding: '10px', backgroundColor: '#3b82f6',
+                    color: 'white', border: 'none', borderRadius: '8px',
+                    fontSize: '15px', fontWeight: '600', cursor: 'pointer',
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleEditClose}
+                  style={{
+                    flex: 1, padding: '10px', backgroundColor: '#f3f4f6',
+                    color: '#374151', border: '1px solid #d1d5db', borderRadius: '8px',
+                    fontSize: '15px', fontWeight: '600', cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
