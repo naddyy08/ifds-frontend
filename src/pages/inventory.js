@@ -287,7 +287,7 @@ function Inventory() {
               <p><strong>Category:</strong> {item.category}</p>
               <p><strong>Quantity:</strong> {item.quantity} {item.unit}</p>
               <p><strong>Reorder Level:</strong> {item.reorder_level} {item.unit}</p>
-              <p><strong>Unit Price:</strong> RM{item.unit_price}</p>
+              <p><strong>Unit Price:</strong> RM{Number(item.unit_price).toFixed(2)}</p>
               {item.supplier_name && (
                 <p><strong>Supplier:</strong> {item.supplier_name}</p>
               )}
