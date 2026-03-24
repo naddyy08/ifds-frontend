@@ -56,13 +56,15 @@ function SystemSettings() {
     setSuccess('');
     try {
       const res = await exportBackup();
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      // ✅ FIX: Use .json extension and correct blob type
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/json' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'ifds-backup.db');
+      link.setAttribute('download', `ifds_backup_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
       setSuccess('Backup downloaded!');
     } catch (e) {
       setError('Failed to export backup');
@@ -70,7 +72,7 @@ function SystemSettings() {
   };
 
   if (loading) return <div className="admin-panel"><h2>Loading settings...</h2></div>;
-  if (error) return <div className="admin-panel"><h2>Error</h2><p>{error}</p></div>;
+  if (!settings) return <div className="admin-panel"><h2>Error</h2><p>{error}</p></div>;
 
   return (
     <div className="admin-panel">
