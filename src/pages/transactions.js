@@ -10,11 +10,22 @@ import {
 import { TrendingUp, TrendingDown, Trash2, AlertTriangle, Shield } from 'lucide-react';
 import './transactions.css';
 
+const CATEGORIES = [
+  'Flours & Baking Basics',
+  'Nuts, Seeds & Dried Fruits',
+  'Proteins',
+  'Vegetables & Fruits',
+  'Dairy & Chilled Fats',
+  'Condiments, Spreads & Oils',
+  'Beverages',
+];
+
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [activeTab, setActiveTab] = useState('view');
   const [transactionType, setTransactionType] = useState('stock_in');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [formData, setFormData] = useState({
     inventory_id: '',
     quantity: '',
@@ -43,13 +54,25 @@ function Transactions() {
     }
   };
 
+  // Filter inventory by selected category
+  const filteredInventory = selectedCategory
+    ? inventory.filter((item) => item.category === selectedCategory)
+    : inventory;
+
+  const handleCategorySelect = (category) => {
+    // Toggle off if same category clicked again
+    setSelectedCategory((prev) => (prev === category ? '' : category));
+    // Reset item selection when category changes
+    setFormData((prev) => ({ ...prev, inventory_id: '' }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       let response;
-      
+
       if (transactionType === 'stock_in') {
         response = await stockIn(formData);
       } else if (transactionType === 'stock_out') {
@@ -58,50 +81,45 @@ function Transactions() {
         response = await recordWaste(formData);
       }
 
-      // Check for fraud warnings in response
       const data = response.data;
-      
+
       if (data.fraud_warning) {
         const alertCount = data.fraud_warning.message;
         const mlDetected = data.fraud_warning.ml_detection?.detected;
         const riskScore = data.ai_analysis?.ml_risk_score || 0;
-        
-        // Show detailed fraud alert
+
         let alertMessage = `⚠️ FRAUD ALERT!\n\n${alertCount}\n\n`;
-        
+
         if (mlDetected) {
           alertMessage += `🤖 AI Risk Score: ${riskScore}/100\n`;
           alertMessage += `Risk Level: ${data.ai_analysis.risk_level.toUpperCase()}\n\n`;
         }
-        
+
         if (data.fraud_warning.rule_based_alerts?.length > 0) {
           alertMessage += 'Detected Issues:\n';
           data.fraud_warning.rule_based_alerts.forEach((alert, index) => {
             alertMessage += `${index + 1}. ${alert.alert_type.replace(/_/g, ' ')}\n`;
           });
         }
-        
+
         alertMessage += '\n⚠️ This transaction has been flagged for review.';
-        
         alert(alertMessage);
       } else {
         alert('✅ Transaction recorded successfully!');
       }
 
-      // Reset form
       setFormData({
         inventory_id: '',
         quantity: '',
         reason: '',
         reference_no: '',
       });
-      
-      // Reload data
+      setSelectedCategory('');
       loadData();
-      
+
     } catch (error) {
       console.error('Transaction error:', error);
-      
+
       if (error.response?.data?.fraud_warning) {
         alert(`Transaction recorded but flagged: ${error.response.data.fraud_warning.message}`);
       } else {
@@ -112,9 +130,8 @@ function Transactions() {
     }
   };
 
-  // ✅ NOW BEING USED - Color coding for risk levels
   const getRiskColor = (riskLevel) => {
-    switch(riskLevel) {
+    switch (riskLevel) {
       case 'high': return '#ef4444';
       case 'medium': return '#f59e0b';
       case 'low': return '#10b981';
@@ -190,14 +207,71 @@ function Transactions() {
           </div>
 
           <form onSubmit={handleSubmit} className="transaction-form">
+
+            {/* Item Name / Category Filter */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Item Category <span style={{ color: '#9ca3af', fontWeight: 400 }}>(filter by category first)</span>
+              </label>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
+              }}>
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => handleCategorySelect(cat)}
+                    disabled={loading}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      border: selectedCategory === cat ? '2px solid #667eea' : '2px solid #e5e7eb',
+                      backgroundColor: selectedCategory === cat ? '#667eea' : '#ffffff',
+                      color: selectedCategory === cat ? '#ffffff' : '#374151',
+                      fontSize: '13px',
+                      fontWeight: selectedCategory === cat ? '600' : '400',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              {selectedCategory && (
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px' }}>
+                  Showing {filteredInventory.length} item{filteredInventory.length !== 1 ? 's' : ''} in <strong>{selectedCategory}</strong>
+                  {' — '}
+                  <span
+                    style={{ color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
+                    onClick={() => handleCategorySelect(selectedCategory)}
+                  >
+                    Clear filter
+                  </span>
+                </p>
+              )}
+            </div>
+
+            {/* Select Item Dropdown */}
             <select
               value={formData.inventory_id}
               onChange={(e) => setFormData({ ...formData, inventory_id: e.target.value })}
               required
               disabled={loading}
             >
-              <option value="">Select Item</option>
-              {inventory.map((item) => (
+              <option value="">
+                {selectedCategory ? `Select Item from ${selectedCategory}` : 'Select Item'}
+              </option>
+              {filteredInventory.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.item_name} (Stock: {item.quantity} {item.unit})
                 </option>
@@ -232,8 +306,8 @@ function Transactions() {
               disabled={loading}
             />
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-transaction-btn"
               disabled={loading}
             >
@@ -261,8 +335,7 @@ function Transactions() {
                       {trans.transaction_type === 'stock_out' && '📤 STOCK OUT'}
                       {trans.transaction_type === 'waste' && '🗑️ WASTE'}
                     </span>
-                    
-                    {/* Fraud Indicator */}
+
                     {trans.is_flagged && (
                       <div className="fraud-indicators">
                         <span className="flagged-badge">
@@ -272,28 +345,28 @@ function Transactions() {
                       </div>
                     )}
                   </div>
-                  
+
                   <span className="trans-date">
                     {new Date(trans.timestamp).toLocaleString()}
                   </span>
                 </div>
-                
+
                 <div className="trans-body">
                   <div className="trans-main-info">
                     <p className="item-name">
                       <strong>{trans.item_name}</strong>
                     </p>
                     <p className="quantity-info">
-                      <span className="label">Quantity:</span> 
+                      <span className="label">Quantity:</span>
                       <span className={`value ${trans.transaction_type}`}>
                         {trans.transaction_type === 'stock_in' ? '+' : '-'}
                         {trans.quantity} {trans.inventory_item?.unit || ''}
                       </span>
                     </p>
                     <p className="stock-change">
-                      <span className="label">Stock:</span> 
-                      {trans.previous_quantity} 
-                      <span style={{ margin: '0 8px', color: '#9ca3af' }}>→</span> 
+                      <span className="label">Stock:</span>
+                      {trans.previous_quantity}
+                      <span style={{ margin: '0 8px', color: '#9ca3af' }}>→</span>
                       {trans.new_quantity}
                     </p>
                   </div>
@@ -316,7 +389,6 @@ function Transactions() {
                     </p>
                   )}
 
-                  {/* ✅ ENHANCED: AI Analysis Display with Color-Coded Risk */}
                   {trans.is_flagged && (
                     <div style={{
                       marginTop: '12px',
@@ -325,21 +397,20 @@ function Transactions() {
                       borderLeft: `4px solid ${getRiskColor(trans.ai_analysis?.risk_level || 'high')}`,
                       borderRadius: '6px'
                     }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '8px',
                         marginBottom: '8px'
                       }}>
                         <Shield size={16} color={getRiskColor(trans.ai_analysis?.risk_level || 'high')} />
-                        <strong style={{ 
-                          color: getRiskColor(trans.ai_analysis?.risk_level || 'high'), 
-                          fontSize: '14px' 
+                        <strong style={{
+                          color: getRiskColor(trans.ai_analysis?.risk_level || 'high'),
+                          fontSize: '14px'
                         }}>
                           AI Fraud Alert
                         </strong>
-                        
-                        {/* Risk Score Badge */}
+
                         {trans.ai_analysis?.ml_risk_score !== undefined && (
                           <span style={{
                             marginLeft: 'auto',
@@ -354,18 +425,17 @@ function Transactions() {
                           </span>
                         )}
                       </div>
-                      
-                      <p style={{ 
-                        fontSize: '12px', 
+
+                      <p style={{
+                        fontSize: '12px',
                         color: '#991b1b',
                         margin: '0 0 8px 0',
                         lineHeight: '1.5'
                       }}>
-                        This transaction has been flagged for potential fraud. 
+                        This transaction has been flagged for potential fraud.
                         Review required by manager or administrator.
                       </p>
-                      
-                      {/* Risk Level Indicator */}
+
                       {trans.ai_analysis?.risk_level && (
                         <div style={{
                           display: 'inline-block',
