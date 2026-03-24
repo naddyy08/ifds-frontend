@@ -25,7 +25,13 @@ function Transactions() {
   const [inventory, setInventory] = useState([]);
   const [activeTab, setActiveTab] = useState('view');
   const [transactionType, setTransactionType] = useState('stock_in');
+
+  // Item Name search state
   const [itemName, setItemName] = useState('');
+  const [selectedStock, setSelectedStock] = useState('');
+  const [selectedUnit, setSelectedUnit] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+
   const [formData, setFormData] = useState({
     inventory_id: '',
     quantity: '',
@@ -54,15 +60,54 @@ function Transactions() {
     }
   };
 
-  // When user selects an item from dropdown, auto-fill Item Name
-  const handleSelectItem = (e) => {
-    const selectedId = e.target.value;
-    setFormData({ ...formData, inventory_id: selectedId });
-    if (selectedId) {
-      const found = inventory.find((i) => String(i.id) === String(selectedId));
-      if (found) setItemName(found.item_name);
+  // When user types item name, find matching item and auto-fill stock
+  const handleItemNameChange = (e) => {
+    const typed = e.target.value;
+    setItemName(typed);
+
+    // Try to find exact or partial match in inventory
+    const match = inventory.find(
+      (i) => i.item_name.toLowerCase() === typed.toLowerCase()
+    );
+    if (match) {
+      setSelectedStock(match.quantity);
+      setSelectedUnit(match.unit);
+      setSelectedCategory(match.category);
+      setFormData((prev) => ({ ...prev, inventory_id: match.id }));
     } else {
-      setItemName('');
+      setSelectedStock('');
+      setSelectedUnit('');
+      setSelectedCategory('');
+      setFormData((prev) => ({ ...prev, inventory_id: '' }));
+    }
+  };
+
+  // When user picks from category dropdown, auto-fill item name + stock
+  const handleCategorySelect = (e) => {
+    const cat = e.target.value;
+    setSelectedCategory(cat);
+    // Reset item fields when category changes
+    setItemName('');
+    setSelectedStock('');
+    setSelectedUnit('');
+    setFormData((prev) => ({ ...prev, inventory_id: '' }));
+  };
+
+  // Items filtered by selected category (for suggestion if needed)
+  const itemsInCategory = selectedCategory
+    ? inventory.filter((i) => i.category === selectedCategory)
+    : inventory;
+
+  // When user selects an item from the filtered list
+  const handleItemSelect = (e) => {
+    const id = e.target.value;
+    const found = inventory.find((i) => String(i.id) === String(id));
+    if (found) {
+      setItemName(found.item_name);
+      setSelectedStock(found.quantity);
+      setSelectedUnit(found.unit);
+      setSelectedCategory(found.category);
+      setFormData((prev) => ({ ...prev, inventory_id: found.id }));
     }
   };
 
@@ -83,19 +128,15 @@ function Transactions() {
       const data = response.data;
 
       if (data.fraud_warning) {
-        const alertCount = data.fraud_warning.message;
-        const mlDetected = data.fraud_warning.ml_detection?.detected;
-        const riskScore = data.ai_analysis?.ml_risk_score || 0;
-
-        let alertMessage = `⚠️ FRAUD ALERT!\n\n${alertCount}\n\n`;
-        if (mlDetected) {
-          alertMessage += `🤖 AI Risk Score: ${riskScore}/100\n`;
+        let alertMessage = `⚠️ FRAUD ALERT!\n\n${data.fraud_warning.message}\n\n`;
+        if (data.fraud_warning.ml_detection?.detected) {
+          alertMessage += `🤖 AI Risk Score: ${data.ai_analysis?.ml_risk_score || 0}/100\n`;
           alertMessage += `Risk Level: ${data.ai_analysis.risk_level.toUpperCase()}\n\n`;
         }
         if (data.fraud_warning.rule_based_alerts?.length > 0) {
           alertMessage += 'Detected Issues:\n';
-          data.fraud_warning.rule_based_alerts.forEach((alert, index) => {
-            alertMessage += `${index + 1}. ${alert.alert_type.replace(/_/g, ' ')}\n`;
+          data.fraud_warning.rule_based_alerts.forEach((alert, i) => {
+            alertMessage += `${i + 1}. ${alert.alert_type.replace(/_/g, ' ')}\n`;
           });
         }
         alertMessage += '\n⚠️ This transaction has been flagged for review.';
@@ -104,9 +145,12 @@ function Transactions() {
         alert('✅ Transaction recorded successfully!');
       }
 
-      // Reset all fields
+      // Reset all
       setFormData({ inventory_id: '', quantity: '', reason: '', reference_no: '' });
       setItemName('');
+      setSelectedStock('');
+      setSelectedUnit('');
+      setSelectedCategory('');
       loadData();
 
     } catch (error) {
@@ -128,6 +172,25 @@ function Transactions() {
       case 'low': return '#10b981';
       default: return '#6b7280';
     }
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    fontSize: '14px',
+    boxSizing: 'border-box',
+    color: '#374151',
+    backgroundColor: '#fff',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '6px',
   };
 
   return (
@@ -186,7 +249,7 @@ function Transactions() {
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px'
+            gap: '10px',
           }}>
             <Shield size={20} color="#0284c7" />
             <span style={{ fontSize: '14px', color: '#0369a1' }}>
@@ -196,82 +259,78 @@ function Transactions() {
 
           <form onSubmit={handleSubmit} className="transaction-form">
 
-            {/* Item Name — read-only, auto-filled when item selected */}
-            <div style={{ marginBottom: '4px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Item Name
-              </label>
+            {/* Item Name */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={labelStyle}>Item Name</label>
               <input
                 type="text"
-                placeholder="Auto-filled when you select an item below..."
+                placeholder="e.g. Unbleached Bread Flour"
                 value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={handleItemNameChange}
                 disabled={loading}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Stock — auto-filled, read-only */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={labelStyle}>Stock</label>
+              <input
+                type="text"
+                placeholder="Auto-filled after selecting item"
+                value={selectedStock ? `${selectedStock} ${selectedUnit}` : ''}
+                readOnly
                 style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  backgroundColor: itemName ? '#f0fdf4' : '#fff',
-                  boxSizing: 'border-box',
-                  color: '#374151',
+                  ...inputStyle,
+                  backgroundColor: selectedStock ? '#f0fdf4' : '#f9fafb',
+                  color: selectedStock ? '#15803d' : '#9ca3af',
+                  fontWeight: selectedStock ? '600' : '400',
+                  cursor: 'default',
                 }}
               />
             </div>
 
-            {/* Select Item — grouped by category */}
-            <div style={{ marginBottom: '4px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Select Item
-              </label>
+            {/* Select Item — category dropdown then item list */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={labelStyle}>Select Item</label>
+
+              {/* Category dropdown */}
               <select
-                value={formData.inventory_id}
-                onChange={handleSelectItem}
-                required
+                value={selectedCategory}
+                onChange={handleCategorySelect}
                 disabled={loading}
+                style={{ ...inputStyle, marginBottom: '8px' }}
               >
-                <option value="">— Select Item —</option>
-                {CATEGORIES.map((cat) => {
-                  const itemsInCat = inventory.filter((i) => i.category === cat);
-                  if (itemsInCat.length === 0) return null;
-                  return (
-                    <optgroup key={cat} label={cat}>
-                      {itemsInCat.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.item_name} (Stock: {item.quantity} {item.unit})
-                        </option>
-                      ))}
-                    </optgroup>
-                  );
-                })}
-                {/* Items with no matching category */}
-                {inventory.filter((i) => !CATEGORIES.includes(i.category)).length > 0 && (
-                  <optgroup label="Other">
-                    {inventory
-                      .filter((i) => !CATEGORIES.includes(i.category))
-                      .map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.item_name} (Stock: {item.quantity} {item.unit})
-                        </option>
-                      ))}
-                  </optgroup>
-                )}
+                <option value="">— Select Category —</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
+
+              {/* Item list dropdown — shown after category selected */}
+              {selectedCategory && (
+                <select
+                  value={formData.inventory_id}
+                  onChange={handleItemSelect}
+                  required
+                  disabled={loading}
+                  style={inputStyle}
+                >
+                  <option value="">
+                    {itemsInCategory.length === 0
+                      ? 'No items in this category'
+                      : `— Select from ${selectedCategory} (${itemsInCategory.length}) —`}
+                  </option>
+                  {itemsInCategory.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.item_name} (Stock: {item.quantity} {item.unit})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
+            {/* Quantity */}
             <input
               type="number"
               step="0.01"
@@ -283,6 +342,7 @@ function Transactions() {
               disabled={loading}
             />
 
+            {/* Reason */}
             <input
               type="text"
               placeholder={transactionType === 'waste' ? 'Reason (Required for waste) *' : 'Reason'}
@@ -292,6 +352,7 @@ function Transactions() {
               disabled={loading}
             />
 
+            {/* Reference Number */}
             <input
               type="text"
               placeholder="Reference Number (Optional)"
@@ -373,7 +434,7 @@ function Transactions() {
                       marginTop: '12px', padding: '12px',
                       backgroundColor: '#fef2f2',
                       borderLeft: `4px solid ${getRiskColor(trans.ai_analysis?.risk_level || 'high')}`,
-                      borderRadius: '6px'
+                      borderRadius: '6px',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                         <Shield size={16} color={getRiskColor(trans.ai_analysis?.risk_level || 'high')} />
@@ -384,7 +445,7 @@ function Transactions() {
                           <span style={{
                             marginLeft: 'auto', padding: '3px 10px',
                             backgroundColor: getRiskColor(trans.ai_analysis.risk_level),
-                            color: 'white', borderRadius: '12px', fontSize: '11px', fontWeight: '700'
+                            color: 'white', borderRadius: '12px', fontSize: '11px', fontWeight: '700',
                           }}>
                             Risk: {trans.ai_analysis.ml_risk_score}/100
                           </span>
@@ -398,7 +459,7 @@ function Transactions() {
                           display: 'inline-block', padding: '4px 8px',
                           backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: '4px',
                           fontSize: '11px', fontWeight: '600',
-                          color: getRiskColor(trans.ai_analysis.risk_level)
+                          color: getRiskColor(trans.ai_analysis.risk_level),
                         }}>
                           Risk Level: {trans.ai_analysis.risk_level.toUpperCase()}
                         </div>
