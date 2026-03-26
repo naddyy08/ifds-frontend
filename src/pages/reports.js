@@ -449,9 +449,7 @@ function Reports() {
             </div>
           )}
 
-          <div className="report-content">
-            <pre>{JSON.stringify(reportData, null, 2)}</pre>
-          </div>
+          {/* Removed raw JSON output for cleaner user experience */}
         </div>
       )}
     </div>
