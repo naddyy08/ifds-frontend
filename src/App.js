@@ -9,6 +9,7 @@ import Transactions from './pages/transactions';
 import FraudAlerts from './pages/fraudalerts';
 import Reports from './pages/reports';
 import AuditLogs from './pages/AuditLogs';
+import UserManagement from './pages/UserManagement';
 import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
 import './App.css';
@@ -18,16 +19,13 @@ function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem('access_token');
   const userStr = localStorage.getItem('user');
 
-  // Not logged in - redirect to login
   if (!token || !userStr) {
     return <Navigate to="/login" replace />;
   }
 
-  // Check role if specified
   if (allowedRoles) {
     const user = JSON.parse(userStr);
     if (!allowedRoles.includes(user.role)) {
-      // User doesn't have permission - redirect to dashboard with alert
       alert('Access Denied: You do not have permission to access this page.');
       return <Navigate to="/dashboard" replace />;
     }
@@ -43,7 +41,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        
+
         {/* Protected Routes with Layout */}
         <Route
           path="/*"
@@ -60,27 +58,28 @@ function App() {
                       <Route path="/inventory" element={<Inventory />} />
                       <Route path="/transactions" element={<Transactions />} />
                       <Route path="/fraud-alerts" element={<FraudAlerts />} />
-                      
-                      {/* Reports - ONLY admin and manager */}
-                      <Route 
-                        path="/reports" 
+
+                      {/* Reports - admin and manager only */}
+                      <Route
+                        path="/reports"
                         element={
                           <ProtectedRoute allowedRoles={['admin', 'manager']}>
                             <Reports />
                           </ProtectedRoute>
-                        } 
+                        }
                       />
-                      
-                      {/* Audit Logs - ONLY admin */}
-                      <Route 
-                        path="/audit-logs" 
+
+                      {/* Audit Logs - admin only */}
+                      <Route
+                        path="/audit-logs"
                         element={
                           <ProtectedRoute allowedRoles={['admin']}>
                             <AuditLogs />
                           </ProtectedRoute>
-                        } 
+                        }
                       />
-                      {/* System Settings - ONLY admin */}
+
+                      {/* System Settings - admin only */}
                       <Route
                         path="/system-settings"
                         element={
@@ -89,7 +88,17 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
-                      
+
+                      {/* ✅ User Management - admin only */}
+                      <Route
+                        path="/user-management"
+                        element={
+                          <ProtectedRoute allowedRoles={['admin']}>
+                            <UserManagement />
+                          </ProtectedRoute>
+                        }
+                      />
+
                       {/* Default redirect */}
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
