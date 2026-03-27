@@ -9,42 +9,39 @@ function Navbar() {
   const user = JSON.parse(localStorage.getItem('user'));
 
   const handleLogout = () => {
-    // Clear localStorage
+    localStorage.removeItem('access_token');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
-    // Redirect to login
     navigate('/login');
   };
 
-  // Get role-specific icon and color
   const getRoleInfo = (role) => {
-    switch(role) {
+    switch (role) {
       case 'admin':
-        return { 
-          icon: Shield, 
-          color: '#ef4444', 
+        return {
+          icon: Shield,
+          color: '#ef4444',
           bgColor: '#fee2e2',
           label: 'Administrator'
         };
       case 'manager':
-        return { 
-          icon: Users, 
-          color: '#3b82f6', 
+        return {
+          icon: Users,
+          color: '#3b82f6',
           bgColor: '#dbeafe',
           label: 'Manager'
         };
       case 'staff':
-        return { 
-          icon: UserCircle, 
-          color: '#10b981', 
+        return {
+          icon: UserCircle,
+          color: '#10b981',
           bgColor: '#d1fae5',
           label: 'Staff'
         };
       default:
-        return { 
-          icon: User, 
-          color: '#6b7280', 
+        return {
+          icon: User,
+          color: '#6b7280',
           bgColor: '#f3f4f6',
           label: 'User'
         };
@@ -53,6 +50,7 @@ function Navbar() {
 
   const roleInfo = getRoleInfo(user?.role);
   const RoleIcon = roleInfo.icon;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <nav className="navbar">
@@ -60,10 +58,26 @@ function Navbar() {
         <h2>🔐 IFDS</h2>
         <span className="navbar-subtitle">Inventory Fraud Detection System</span>
       </div>
-      
+
       <div className="navbar-user">
-        {/* User Info */}
-        <div className="user-info">
+        {/* User Info — clickable for admin to go to User Management */}
+        <div
+          className="user-info"
+          onClick={isAdmin ? () => navigate('/user-management') : undefined}
+          title={isAdmin ? 'Click to manage users' : undefined}
+          style={{
+            cursor: isAdmin ? 'pointer' : 'default',
+            padding: '6px 10px',
+            borderRadius: '8px',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => {
+            if (isAdmin) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <div className="user-details">
             <div className="user-name">
               <User size={16} />
@@ -73,9 +87,9 @@ function Navbar() {
               {user?.email || 'No email'}
             </div>
           </div>
-          
+
           {/* Role Badge */}
-          <div 
+          <div
             className="role-badge"
             style={{
               backgroundColor: roleInfo.bgColor,
@@ -87,17 +101,29 @@ function Navbar() {
               gap: '6px',
               fontSize: '13px',
               fontWeight: '600',
-              marginLeft: '12px'
+              marginLeft: '12px',
             }}
           >
             <RoleIcon size={16} />
             <span>{roleInfo.label}</span>
           </div>
+
+          {/* Small hint for admin */}
+          {isAdmin && (
+            <div style={{
+              marginLeft: '8px',
+              fontSize: '11px',
+              color: 'rgba(255,255,255,0.6)',
+              whiteSpace: 'nowrap',
+            }}>
+              👥 Manage Users
+            </div>
+          )}
         </div>
 
         {/* Logout Button */}
-        <button 
-          onClick={handleLogout} 
+        <button
+          onClick={handleLogout}
           className="logout-btn"
           title="Logout"
         >
