@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getAllAlerts, reviewAlert, getFraudStatistics } from '../services/api';
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import RoleBasedAccess from '../components/RoleBasedAccess';
+import { toLocalTime } from '../utils/timeUtils';
 import './fraudalerts.css';
 
 function FraudAlerts() {
@@ -12,13 +13,11 @@ function FraudAlerts() {
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    // Get user role from localStorage
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
       setUserRole(user.role);
     }
-    
     loadData();
   }, []);
 
@@ -39,14 +38,13 @@ function FraudAlerts() {
   };
 
   const handleReview = async (alertId, status) => {
-    // Check role before allowing review
     if (userRole !== 'admin' && userRole !== 'manager') {
       alert('Access Denied: Only managers and administrators can review fraud alerts.');
       return;
     }
 
     const notes = prompt(`Enter notes for marking this alert as ${status}:`);
-    if (notes === null) return; // User cancelled
+    if (notes === null) return;
 
     if (!notes.trim()) {
       alert('Please provide notes for this review.');
@@ -55,7 +53,7 @@ function FraudAlerts() {
 
     try {
       await reviewAlert(alertId, { status, notes });
-      loadData(); // Reload data
+      loadData();
       alert(`✅ Alert successfully marked as ${status}!`);
     } catch (error) {
       console.error('Failed to review alert:', error);
@@ -130,8 +128,7 @@ function FraudAlerts() {
 
               <div className="alert-body">
                 <p className="alert-description">{alert.description}</p>
-                
-                {/* Transaction Details */}
+
                 {alert.transaction && (
                   <div className="transaction-info">
                     <p><strong>Item:</strong> {alert.transaction.item_name}</p>
@@ -142,13 +139,13 @@ function FraudAlerts() {
                 )}
 
                 <div className="alert-meta">
-                  <span>📅 Detected: {alert.detected_at}</span>
+                  {/* ✅ FIX: Convert UTC to local time */}
+                  <span>📅 Detected: {toLocalTime(alert.detected_at)}</span>
                   <span className={`status-badge ${alert.status}`}>
                     {alert.status.toUpperCase()}
                   </span>
                 </div>
 
-                {/* RBAC: Only admin and manager can review */}
                 {alert.status === 'pending' && (
                   <RoleBasedAccess allowedRoles={['admin', 'manager']}>
                     <div className="alert-actions">
@@ -170,7 +167,6 @@ function FraudAlerts() {
                   </RoleBasedAccess>
                 )}
 
-                {/* Show message for staff when alert is pending */}
                 {alert.status === 'pending' && userRole === 'staff' && (
                   <div className="staff-message" style={{
                     padding: '10px',
@@ -185,13 +181,13 @@ function FraudAlerts() {
                   </div>
                 )}
 
-                {/* Show review notes if reviewed */}
                 {alert.notes && (
                   <div className="alert-notes">
                     <strong>📝 Review Notes:</strong> {alert.notes}
                     {alert.reviewed_at && (
                       <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                        Reviewed: {alert.reviewed_at}
+                        {/* ✅ FIX: Convert UTC to local time */}
+                        Reviewed: {toLocalTime(alert.reviewed_at)}
                       </div>
                     )}
                   </div>
