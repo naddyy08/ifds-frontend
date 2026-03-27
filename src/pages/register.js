@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/api';
-import './login.css'; // Reuse login.css for styling
+import './login.css';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -10,7 +10,6 @@ function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'staff' // Default to staff, admin can be created via Postman
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,13 +19,11 @@ function Register() {
     e.preventDefault();
     setError('');
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match!');
       return;
     }
 
-    // Validate password strength
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long!');
       return;
@@ -39,10 +36,10 @@ function Register() {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: formData.role
+        // ✅ Role is NOT sent from frontend — backend always assigns 'staff'
       });
 
-      alert('Registration successful! Please login.');
+      alert('Registration successful! Your account has been created as Staff. An administrator can update your role if needed.');
       navigate('/login');
     } catch (err) {
       setError(
@@ -61,15 +58,33 @@ function Register() {
 
         {error && <div className="error-message">{error}</div>}
 
+        {/* Info notice */}
+        <div style={{
+          backgroundColor: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          fontSize: '13px',
+          color: '#0369a1',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '8px',
+        }}>
+          <span>ℹ️</span>
+          <span>
+            New accounts are registered as <strong>Staff</strong> by default.
+            Contact your administrator to update your role.
+          </span>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Username</label>
             <input
               type="text"
               value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
               placeholder="Enter username"
               minLength="3"
@@ -81,9 +96,7 @@ function Register() {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               placeholder="Enter email"
             />
@@ -94,9 +107,7 @@ function Register() {
             <input
               type="password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
               placeholder="Enter password (min 8 characters)"
               minLength="8"
@@ -108,34 +119,14 @@ function Register() {
             <input
               type="password"
               value={formData.confirmPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, confirmPassword: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               required
               placeholder="Confirm password"
             />
           </div>
 
-          <div className="form-group">
-            <label>Role</label>
-            <select
-              value={formData.role}
-              onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
-              }
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '14px'
-              }}
-            >
-              <option value="staff">Staff</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+          {/* ✅ Role field removed — no longer shown to user */}
+          {/* Role is always 'staff', set by backend */}
 
           <button type="submit" disabled={loading} className="login-button">
             {loading ? 'Registering...' : 'Register'}
