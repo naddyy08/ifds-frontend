@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDashboardSummary } from '../services/api';
 import { Package, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
+import { toLocalTime } from '../utils/timeUtils';
 import './dashboard.css';
 
 function Dashboard() {
@@ -93,7 +94,8 @@ function Dashboard() {
             Role: <strong>{user?.role}</strong>
           </li>
           <li>
-            Last Updated: <strong>{summary?.generated_at}</strong>
+            {/* ✅ FIX: Convert UTC to local time */}
+            Last Updated: <strong>{toLocalTime(summary?.generated_at)}</strong>
           </li>
         </ul>
       </div>
