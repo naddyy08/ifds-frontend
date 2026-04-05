@@ -18,3 +18,6 @@ This is the frontend of my professional E-Portfolio, built to showcase my projec
 2. Install dependencies: `npm install`
 3. Create a `.env` file and add `REACT_APP_API_URL=your_backend_url`
 4. Run locally: `npm start`
+
+### 🖇️ Related Repository
+The backend code for this project can be found here: [ifds-backend](https://github.com/naddyy08/ifds-backend)
